@@ -1,0 +1,35 @@
+version: '3.7'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+      - ~/.cache/pip:/root/.cache/pip
+      - ~/.cache/huggingface:/root/.cache/huggingface
+      - ~/.cache/torch:/root/.cache/torch
+    depends_on:
+      - elasticsearch
+    environment:
+      ELASTICSEARCH_URL: 'http://elasticsearch:9200'
+
+  elasticsearch:
+    image: elasticsearch:8.12.1
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - db:/usr/share/elasticsearch/data
+
+volumes:
+  db:
+    driver: local
+
